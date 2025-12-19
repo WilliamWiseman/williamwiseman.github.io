@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Platformer</title>
+    </head>
+    <body>
+        <style>
+            html{
+                width:100%;
+            }
+            body{
+                width:100%;
+            }
+            canvas {
+            z-index: 1;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100vw;
+        }
+
+
+        </style>
+
+    <canvas id="game" width="1024" height="576"></canvas>
+
+        <script>
+            const pixelSize = window.innerWidth / 1024;
+            const canvas = document.getElementById("game");
+            canvas.style.height = `${pixelSize * 576}px`;
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            let canMove = true;
+            let timer;
+            let fps = 60;
+            ctx.fillStyle = "red";
+            ctx.fillRect(0, 550, 1024, 26);
+        
+        function frame(image, length, power){
+            this.image = image;
+            this.length = length;
+            this.power = power;
+            frame.prototype.time = function(){
+                this.length -= dt;
+                if(this.length <= 0){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+
+        function creature(x, y, width, height, jumpForce){
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.momX = 0;
+            this.momY = 0;
+            this.canJump = false;
+            this.collided = false;
+            this.wantJump = false;
+            this.time = 0;
+            this.jumpForce = jumpForce;
+            this.animation = []; //for when we have a spritesheet
+            
+            creature.prototype.jump = function(){
+                    this.time-= Math.ceil(100 * dt);
+                    if(this.time <= 0){
+                        this.wantJump = false;
+                    }
+                if(this.canJump && this.wantJump){
+                    this.momY = jumpForce;
+                    this.wantJump = false;
+
+                }
+            }
+
+            creature.prototype.move = function(){
+                this.collided = false;
+                this.y+= Math.trunc(this.momY * dt);
+                this.x+= Math.trunc(this.momX * dt);
+                
+                for(let i = 0; i < this.height / 2 + 1; i++){
+                    if(getColor(this.x + Math.floor((this.width / 3)), this.y + this.height / 2 + i)){
+                        this.y-= (this.height / 2) - i;
+                        this.momY = 0;
+                        this.canJump = true;
+                        this.collided = true;
+                        break;
+                    }else if(getColor(this.x + Math.floor((this.width / 3) * 2), this.y + this.height / 2 + i)){
+                        this.y-= (this.height / 2) - i;
+                        this.momY = 0;
+                        this.canJump = true;
+                        this.collided = true;
+                        break;
+                    }
+                }
+                if(!this.collided){
+                    this.canJump = false;
+                }
+                this.jump();
+
+
+                ctx.fillStyle = 'blue';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+        }
+
+        let box = new creature(50, 10, 80, 150, -400);
+            
+        document.addEventListener("keydown", function (event) {
+            event.preventDefault();
+            let key = event.key;
+            key = key.toLowerCase();
+            switch (key) {
+                case "a":
+                case "arrowleft":
+                box.momX = -300;
+                    break;
+                case "d":
+                box.momX = 300;
+                    break;
+                case "s":
+                    break;
+                case "w":
+
+                    break;
+                case "arrowright":
+                    break;
+                case "shift":
+                    box.wantJump = true;
+                    box.time = 10;
+                break;
+            }
+        });
+
+        document.addEventListener("keyup", function (event) {
+            event.preventDefault();
+            let key = event.key;
+            key = key.toLowerCase();
+            switch (key) {
+                case "a":
+                case "arrowleft":
+                    if(box.momX < 0){
+                box.momX = 0;
+                    }
+                    break;
+                case "d":
+                case "arrowright":
+                    if(box.momX > 0){
+                box.momX = 0;
+                    }
+                    break;
+                case "w":
+                    break;
+                case "s":
+                    break;
+                case " ":
+
+                    break;
+            }
+        });
+
+        function collision(a, b) {
+            return !(
+                ((a.y + a.height) < (b.y)) || //checks if a is higher than b's y
+                (a.y > (b.y + b.height)) || // checks if b is lower  than a's y
+                ((a.x + a.width) < b.x) || // checks if a is more left than b 
+                (a.x > (b.x + b.width))// checks if a is more right than b
+            );
+        };
+
+        function getColor(x, y) {
+            const imgdata = ctx.getImageData(x, y, 1, 1);
+            const red = imgdata.data[0];
+            return red;
+        };
+
+        let lastTime = performance.now();
+        let dt;
+
+        function gameLoop(now){
+            dt = (now - lastTime) / 1000;
+            
+            dt = Math.min(dt, 0.5);
+            
+            
+            ctx.clearRect(0, 0, 1024, 576);
+            ctx.fillStyle = "red";
+            ctx.fillRect(0, 550, 1024, 26);
+            ctx.beginPath();
+            ctx.moveTo(480, 570);
+            ctx.lineTo(600, 500);
+            ctx.lineTo(700, 570);
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 10;
+            ctx.stroke();
+            
+            box.momY+= Math.ceil(400 * dt);
+            box.move();
+            canMove = false;
+
+            lastTime = now; //do this after it draws everything. Might make a little difference
+            requestAnimationFrame(gameLoop);
+        }
+        requestAnimationFrame(gameLoop);
+        </script>
+    </body>
+</html>
+        </script>
+    </body>
+</html>
