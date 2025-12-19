@@ -34,6 +34,17 @@
             let fps = 60;
             ctx.fillStyle = "red";
             ctx.fillRect(0, 550, 1024, 26);
+
+            const spriteSheet = new Image();
+            spriteSheet.src = 'https://williamwiseman.github.io/spriteSheet.png';
+
+            ctx.drawImage(
+                spriteSheet,  // Source image element
+                32, 0, // Source x and y coordinates (top-left corner of the frame on the spritesheet)
+                32, 32, // Source width and height (dimensions of the frame)
+                10, 10, // Destination x and y coordinates (top-left corner on the canvas)
+                32, 32 // Destination width and height (size to draw the frame on the canvas)
+            );
         
         function frame(image, length, power){
             this.image = image;
@@ -77,8 +88,8 @@
 
             creature.prototype.move = function(){
                 this.collided = false;
-                this.y+= Math.trunc(this.momY * dt);
-                this.x+= Math.trunc(this.momX * dt);
+                this.y+= Math.round(this.momY * dt);
+                this.x+= Math.round(this.momX * dt);
                 
                 for(let i = 0; i < this.height / 2 + 1; i++){
                     if(getColor(this.x + Math.floor((this.width / 3)), this.y + this.height / 2 + i)){
@@ -203,7 +214,7 @@
             lastTime = now; //do this after it draws everything. Might make a little difference
             requestAnimationFrame(gameLoop);
         }
-        requestAnimationFrame(gameLoop);
+        //requestAnimationFrame(gameLoop);
         </script>
     </body>
 </html>
